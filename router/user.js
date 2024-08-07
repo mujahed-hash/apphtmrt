@@ -195,7 +195,7 @@ router.post('/user/login', async(req,res)=>{
                 isSupplier: user.isSupplier,
                 isBuyer: user.isBuyer,
             },
-            process.env.secret, // Replace with your secret key
+            process.env.SECRET, // Replace with your secret key
             { expiresIn: '3241d' }
         );
 
