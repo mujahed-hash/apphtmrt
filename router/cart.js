@@ -7,6 +7,8 @@ const roleMiddleware = require('../helper/roles')
 
 
 router.get('/cart/items', middleware.verifyToken, CartController.getCart);
+router.delete('/cart/item', middleware.verifyToken, CartController.removeCartItem);
+
 
 router.post('/addtocart', middleware.verifyToken, CartController.addItemToCart);
 

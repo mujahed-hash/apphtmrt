@@ -351,7 +351,7 @@ const checkoutAll = asyncHandler(async (req, res) => {
 
     const randomComponent = Date.now().toString(); // You can replace this with your own logic
         const customIdentifer = `${slugify(`order-${user.name}`, { lower: true })}-${randomComponent}`;
-
+    const {notes} = req.body
     const order = new Order({
         user: user._id,
         orderItems,
@@ -472,5 +472,6 @@ module.exports = {
     getCart,
     addItemToCart,
     checkoutSingle,
-    checkoutAll
+    checkoutAll,
+    removeCartItem
 };

@@ -11,6 +11,7 @@ router.post('/category',middleware.verifyToken, roleMiddleware('isAdmin'), categ
 router.get('/categories', categoryController.listCategories);
 
 // Get a category by ID
-router.get('/category/:customIdentifer', categoryController.getCategoryById);
-
+router.get('/category/:id', categoryController.getCategoryById);
+router.put('/category/:id', categoryController.updateCategory);
+router.delete('/category/delete-category', categoryController.deleteCategory);
 module.exports = router;

@@ -97,28 +97,71 @@ exports.createProduct = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+// exports.getAllProducts = async (req, res) => {
+//     try {
+//         const start = parseInt(req.query.start) || 0;
+//         const limit = parseInt(req.query.limit) || 10;
+//         const userId= req.userId;
+
+//         const products = await Product.find().sort({date:-1}).populate('category').populate('user').skip(start)
+//         .limit(limit);
+
+//         const totalProducts = await Product.countDocuments({ userId: userId });
+
+//         res.status(200).json({
+//             totalProducts,
+//             products
+//         });
+
+//         res.status(200).json(products);
+//     } catch (error) {
+//         console.error(error);
+//         res.status(500).send('Server error');
+//     }
+// };
 exports.getAllProducts = async (req, res) => {
     try {
         const start = parseInt(req.query.start) || 0;
         const limit = parseInt(req.query.limit) || 10;
-        const userId= req.userId;
+        const userId = req.userId;
 
-        const products = await Product.find().sort({date:-1}).populate('category').populate('user').skip(start)
-        .limit(limit);
+        // Fetch all products with pagination
+        const products = await Product.find()
+            .sort({ date: -1 })
+            .populate('category')
+            .populate('user')
+            .skip(start)
+            .limit(limit);
 
-        const totalProducts = await Product.countDocuments({ userId: userId });
+        // Fetch the user's cart
+        const cart = await Cart.findOne({ user: userId });
 
-        res.status(200).json({
-            totalProducts,
-            products
+        // Check if the user's cart exists and create an array of product IDs in the cart
+        const cartProductIds = cart ? cart.items.map(item => item.product.toString()) : [];
+
+        // Map through products to add 'inCart: true' if the product is in the user's cart
+        const productsWithCartStatus = products.map(product => {
+            return {
+                ...product._doc,  // Spread the product document
+                inCart: cartProductIds.includes(product._id.toString())  // Check if product ID is in the cart
+            };
         });
 
-        res.status(200).json(products);
+        // Total number of products for the user (based on userId)
+        const totalProducts = await Product.countDocuments({ user: userId });
+
+        // Send the response with total products and modified products array
+        res.status(200).json({
+            totalProducts,
+            products: productsWithCartStatus
+        });
+
     } catch (error) {
         console.error(error);
         res.status(500).send('Server error');
     }
 };
+
 exports.getProductsCountforSupplier = async (req, res) => {
     try {
       const userId = req.userId; // Ensure this is correct based on your token payload
