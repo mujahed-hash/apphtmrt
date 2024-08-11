@@ -276,8 +276,8 @@ exports.getProducts = async (req, res) => {
         const limit = parseInt(req.query.limit) || 10;
         const userId = req.userId;
 
-        // Fetch the products based on userId with pagination
-        const products = await Product.find({ userId: userId })
+        // Fetch the products with pagination
+        const products = await Product.find()
             .sort({ date: -1 })
             .select('prodName images customIdentifer prodDesc countInStock prodSize prodPrice')
             .skip(start)
@@ -286,21 +286,22 @@ exports.getProducts = async (req, res) => {
         // Fetch the user's cart
         const cart = await Cart.findOne({ user: userId });
 
-        // Check if the user's cart exists and create an array of product IDs in the cart
+        // Create an array of product IDs in the cart
         const cartProductIds = cart ? cart.items.map(item => item.product.toString()) : [];
 
-        // Add 'inCart: true' if the product is in the user's cart
+        // Check if each product is in the user's cart and add the 'inCart' property
         const productsWithCartStatus = products.map(product => {
+            const isInCart = cartProductIds.includes(product._id.toString());
             return {
                 ...product._doc,  // Spread the product document
-                inCart: cartProductIds.includes(product._id.toString())  // Check if product ID is in the cart
+                inCart: isInCart  // Add the 'inCart' status
             };
         });
 
-        // Total number of products for the user (based on userId)
-        const totalProducts = await Product.countDocuments({ userId: userId });
+        // Total number of products in the database
+        const totalProducts = await Product.countDocuments();
 
-        // Send the response with total products and modified products array
+        // Send the response with total products and the modified products array
         res.status(200).json({
             totalProducts,
             products: productsWithCartStatus
@@ -310,6 +311,7 @@ exports.getProducts = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+
 
 exports.getProductByCustomIdentifier = async (req, res) => {
     try {
