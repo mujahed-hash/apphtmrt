@@ -5,6 +5,7 @@ const mongoose = require('mongoose');
 const Category = require('../database/models/category')
 const { ObjectId } = require('mongodb');
 const category = require('../database/models/category');
+const Cart = require('../database/models/cart');
 
 exports.productPost = async (req, res) => {
     try {
@@ -249,20 +250,60 @@ exports.getProductsByUser = async (req, res) => {
 // };
 
 
+// exports.getProducts = async (req, res) => {
+//     try {
+//         const start = parseInt(req.query.start) || 0;
+//         const limit = parseInt(req.query.limit) || 10;
+//         const userId= req.userId;
+//         const products = await Product.find({ userId: userId }).sort({date:-1}).select('prodName images customIdentifer prodDesc countInStock prodSize prodPrice')
+//             .skip(start)
+//             .limit(limit);
+
+//         const totalProducts = await Product.countDocuments({ userId: userId });
+
+//         res.status(200).json({
+//             totalProducts,
+//             products
+//         });
+//     } catch (error) {
+//         console.error('Error fetching products:', error);
+//         res.status(500).json({ message: error.message });
+//     }
+// };
 exports.getProducts = async (req, res) => {
     try {
         const start = parseInt(req.query.start) || 0;
         const limit = parseInt(req.query.limit) || 10;
-        const userId= req.userId;
-        const products = await Product.find({ userId: userId }).sort({date:-1}).select('prodName images customIdentifer prodDesc countInStock prodSize prodPrice')
+        const userId = req.userId;
+
+        // Fetch the products based on userId with pagination
+        const products = await Product.find({ userId: userId })
+            .sort({ date: -1 })
+            .select('prodName images customIdentifer prodDesc countInStock prodSize prodPrice')
             .skip(start)
             .limit(limit);
 
+        // Fetch the user's cart
+        const cart = await Cart.findOne({ user: userId });
+
+        // Check if the user's cart exists and create an array of product IDs in the cart
+        const cartProductIds = cart ? cart.items.map(item => item.product.toString()) : [];
+
+        // Add 'inCart: true' if the product is in the user's cart
+        const productsWithCartStatus = products.map(product => {
+            return {
+                ...product._doc,  // Spread the product document
+                inCart: cartProductIds.includes(product._id.toString())  // Check if product ID is in the cart
+            };
+        });
+
+        // Total number of products for the user (based on userId)
         const totalProducts = await Product.countDocuments({ userId: userId });
 
+        // Send the response with total products and modified products array
         res.status(200).json({
             totalProducts,
-            products
+            products: productsWithCartStatus
         });
     } catch (error) {
         console.error('Error fetching products:', error);
