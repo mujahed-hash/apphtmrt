@@ -8,7 +8,7 @@ const roleMiddleware = require('../helper/roles')
 // Create a new post
 router.post('/product', middleware.verifyToken, roleMiddleware('isSupplier'), upload.array('images'), productController.productPost);
 // by user
-router.get('/products',productController.getProducts );
+router.get('/products',middleware.verifyToken,productController.getProducts );
 router.get('/supplier/items', middleware.verifyToken, roleMiddleware('isSupplier'), productController.getProductsByUser);
 router.get('/supplier/productscount',middleware.verifyToken, roleMiddleware('isSupplier'), productController.getProductsCountforSupplier );
 router.get('/admin/productscount',middleware.verifyToken, roleMiddleware('isAdmin'), productController.getProductsCountforAmin );

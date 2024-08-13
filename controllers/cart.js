@@ -9,7 +9,7 @@ const slugify = require('slugify');
 // @route   GET /api/cart
 // @access  Private
 const getCart = asyncHandler(async (req, res) => {
-    const cart = await Cart.findOne({ user: req.userId }).populate('items.product', 'prodName prodPrice prodSize countInStock images');
+    const cart = await Cart.findOne({ user: req.userId }).sort({date:-1}).populate('items.product', 'prodName prodPrice prodSize countInStock images');
 
     if (!cart) {
         res.status(404);
@@ -50,37 +50,70 @@ const getCart = asyncHandler(async (req, res) => {
 //         res.status(201).json(createdCart);
 //     }
 // });
+// const addItemToCart = asyncHandler(async (req, res) => {
+//     const { productId, quantity } = req.body;
+
+//     const userId = req.userId || req.user || req.user._id;
+
+//     const cart = await Cart.findOne({ user: userId });
+
+//     if (cart) {
+//         const itemIndex = cart.items.findIndex(item => item.product.toString() === productId);
+
+//         if (itemIndex > -1) {
+//             // Update quantity if item already exists in cart
+//             cart.items[itemIndex].quantity += quantity;
+//         } else {
+//             // Add new item to cart
+//             cart.items.push({ product: productId, quantity });
+//         }
+
+//         await cart.save();
+//         res.json(cart);
+//     } else {
+//         const newCart = new Cart({
+//             user: userId,
+//             items: [{ product: productId, quantity }]
+//         });
+
+//         const createdCart = await newCart.save();
+//         res.status(201).json(createdCart);
+//     }
+// });
+
 const addItemToCart = asyncHandler(async (req, res) => {
-    const { productId, quantity } = req.body;
-
-    const userId = req.userId || req.user || req.user._id;
-
+    const { productId, quantity } = req.body; // Ensure these are being passed correctly
+  
+    const userId = req.userId || req.user._id;
+  
+    // Find the cart for the user
     const cart = await Cart.findOne({ user: userId });
-
+  
     if (cart) {
-        const itemIndex = cart.items.findIndex(item => item.product.toString() === productId);
-
-        if (itemIndex > -1) {
-            // Update quantity if item already exists in cart
-            cart.items[itemIndex].quantity += quantity;
-        } else {
-            // Add new item to cart
-            cart.items.push({ product: productId, quantity });
-        }
-
-        await cart.save();
-        res.json(cart);
+      const itemIndex = cart.items.findIndex(item => item.product.toString() === productId);
+  
+      if (itemIndex > -1) {
+        // If the item exists, update the quantity
+        cart.items[itemIndex].quantity += quantity;
+      } else {
+        // If the item does not exist, add a new one
+        cart.items.push({ product: productId, quantity });
+      }
+  
+      await cart.save();
+      res.json(cart);
     } else {
-        const newCart = new Cart({
-            user: userId,
-            items: [{ product: productId, quantity }]
-        });
-
-        const createdCart = await newCart.save();
-        res.status(201).json(createdCart);
+      // If no cart exists, create a new one
+      const newCart = new Cart({
+        user: userId,
+        items: [{ product: productId, quantity }]
+      });
+  
+      const createdCart = await newCart.save();
+      res.status(201).json(createdCart);
     }
-});
-
+  });
+  
 // @desc    Create order from cart
 // @route   POST /api/cart/checkout
 // @access  Private

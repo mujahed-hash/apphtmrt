@@ -80,32 +80,32 @@ exports.getUsers = async (req,res)=>{
 //     }
 //   };
 
-exports.login = async (req,res)=>{
-    const { email, password } = req.body;
+// exports.login = async (req,res)=>{
+//     const { email, password } = req.body;
 
-    const user = await User.findOne({ email });
-    if (!user) return res.status(400).send('User not found');
+//     const user = await User.findOne({ email });
+//     if (!user) return res.status(400).send('User not found');
 
-    if (await argon2.verify(user.passwordHash, password)) {
-        const token = jwt.sign(
-            {
-                id: user._id,
-                _id: user._id,
-                userId: user.id,
-                isAdmin: user.isAdmin,
-                isSupplier: user.isSupplier,
-                isBuyer: user.isBuyer,
-            },
-            process.env.SECRET, // Replace with your secret key
-            { expiresIn: '321d' }
-        );
+//     if (await argon2.verify(user.passwordHash, password)) {
+//         const token = jwt.sign(
+//             {
+//                 id: user._id,
+//                 _id: user._id,
+//                 userId: user.id,
+//                 isAdmin: user.isAdmin,
+//                 isSupplier: user.isSupplier,
+//                 isBuyer: user.isBuyer,
+//             },
+//             process.env.SECRET, // Replace with your secret key
+//             { expiresIn: '321d' }
+//         );
 
-        res.send({ user: user.email, token });
-    } else {
-        res.send('Password is wrong');
-    }
+//         res.send({ user: user.email, token });
+//     } else {
+//         res.send('Password is wrong');
+//     }
    
-}
+// }
 // exports.signUp = async (req,res)=>{
 //     const { name, email, password, phone, street, apartment, city, zip, country, isAdmin, isSupplier, isBuyer } = req.body;
      
@@ -147,12 +147,95 @@ exports.login = async (req,res)=>{
 //     res.send(user);
 
 // }
+// exports.signUp = async (req, res) => {
+//     const { name, email, password, phone, street, apartment, city, zip, country, isAdmin, isSupplier, isBuyer } = req.body;
+
+//     try {
+//         // Check if the user already exists
+//         const foundUser = await User.findOne({ email });
+//         if (foundUser) {
+//             return res.status(400).send('User already exists');
+//         }
+
+//         // Hash the password
+//         const passwordHash = await argon2.hash(password);
+//         const randomComponent = Date.now().toString();
+//         const customIdentifier = `${slugify(name, { lower: true })}-${randomComponent}`;
+
+//         // Create a new user
+//         const user = new User({
+//             name,
+//             email,
+//             passwordHash,
+//             phone,
+//             street,
+//             apartment,
+//             city,
+//             zip,
+//             country,
+//             isAdmin: isAdmin || false,
+//             isSupplier: isSupplier || false,
+//             isBuyer: isBuyer || false,
+//             customIdentifer:customIdentifier,
+//         });
+
+//         // Save the user to the database
+//         const savedUser = await user.save();
+
+//         // Send the response
+//         res.status(201).send(savedUser);
+
+//     } catch (error) {
+//         console.error('Error creating user:', error);
+//         res.status(500).send('The user cannot be created');
+//     }
+// };
+
+exports.login = async (req, res) => {
+    const { email, password } = req.body;
+
+    try {
+        // Normalize email to lowercase
+        const normalizedEmail = email.toLowerCase();
+    console.log(normalizedEmail)
+        const user = await User.findOne({ email: normalizedEmail });
+        if (!user) return res.status(400).send('User not found');
+
+        if (await argon2.verify(user.passwordHash, password)) {
+            const token = jwt.sign(
+                {
+                    id: user._id,
+                    _id: user._id,
+                    userId: user.id,
+                    isAdmin: user.isAdmin,
+                    isSupplier: user.isSupplier,
+                    isBuyer: user.isBuyer,
+                },
+                process.env.SECRET, // Replace with your secret key
+                { expiresIn: '321d' }
+            );
+
+            res.send({ user: user.email, token });
+        } else {
+            res.status(400).send('Password is incorrect');
+        }
+
+    } catch (error) {
+        console.error('Error during login:', error);
+        res.status(500).send('Internal Server Error');
+    }
+};
+
+
 exports.signUp = async (req, res) => {
     const { name, email, password, phone, street, apartment, city, zip, country, isAdmin, isSupplier, isBuyer } = req.body;
 
     try {
+        // Normalize email to lowercase
+        const normalizedEmail = email.toLowerCase();
+
         // Check if the user already exists
-        const foundUser = await User.findOne({ email });
+        const foundUser = await User.findOne({ email: normalizedEmail });
         if (foundUser) {
             return res.status(400).send('User already exists');
         }
@@ -165,7 +248,7 @@ exports.signUp = async (req, res) => {
         // Create a new user
         const user = new User({
             name,
-            email,
+            email: normalizedEmail,
             passwordHash,
             phone,
             street,
@@ -176,7 +259,7 @@ exports.signUp = async (req, res) => {
             isAdmin: isAdmin || false,
             isSupplier: isSupplier || false,
             isBuyer: isBuyer || false,
-            customIdentifer:customIdentifier,
+            customIdentifer: customIdentifier,
         });
 
         // Save the user to the database

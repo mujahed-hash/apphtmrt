@@ -20,7 +20,10 @@ const cartSchema = mongoose.Schema({
             }
         }
     ],
-    notes:String
+    date: {
+        type: Date,
+        default: Date.now
+    }
 });
 
 module.exports = mongoose.model('Cart', cartSchema);

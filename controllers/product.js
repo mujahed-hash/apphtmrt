@@ -284,14 +284,18 @@ exports.getProducts = async (req, res) => {
             .limit(limit);
 
         // Fetch the user's cart
-        const cart = await Cart.findOne({ user: userId });
-
-        // Create an array of product IDs in the cart
-        const cartProductIds = cart ? cart.items.map(item => item.product.toString()) : [];
-
-        // Check if each product is in the user's cart and add the 'inCart' property
+        const cart = await Cart.findOne({ user: userId })
+        console.log("Cart structure:", cart);
+        console.log("Fetched products:", products);
+        // Check if each product is in the user's cart using findIndex
         const productsWithCartStatus = products.map(product => {
-            const isInCart = cartProductIds.includes(product._id.toString());
+            const productId = product._id.toString();
+            const itemIndex = cart ? cart.items.findIndex(item => {
+                console.log("Comparing cart item ID:", item.product.toString(), "with product ID:", product._id.toString());
+                return item.product.toString() === product._id.toString();
+            }) : -1;
+                        const isInCart = itemIndex !== -1;  // If itemIndex is not -1, product is in the cart
+
             return {
                 ...product._doc,  // Spread the product document
                 inCart: isInCart  // Add the 'inCart' status
@@ -311,6 +315,7 @@ exports.getProducts = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+
 
 
 exports.getProductByCustomIdentifier = async (req, res) => {
