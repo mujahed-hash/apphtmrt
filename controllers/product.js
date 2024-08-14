@@ -6,6 +6,8 @@ const Category = require('../database/models/category')
 const { ObjectId } = require('mongodb');
 const category = require('../database/models/category');
 const Cart = require('../database/models/cart');
+var path = require('path');
+const fs = require('fs');
 
 exports.productPost = async (req, res) => {
     try {
@@ -277,7 +279,7 @@ exports.getProducts = async (req, res) => {
         const userId = req.userId;
 
         // Fetch the products with pagination
-        const products = await Product.find()
+        const products = await Product.find({ countInStock: { $gt: 0 } })
             .sort({ date: -1 })
             .select('prodName images customIdentifer prodDesc countInStock prodSize prodPrice')
             .skip(start)
@@ -303,7 +305,7 @@ exports.getProducts = async (req, res) => {
         });
 
         // Total number of products in the database
-        const totalProducts = await Product.countDocuments();
+        const totalProducts = await Product.countDocuments({ countInStock: { $gt: 0 } });
 
         // Send the response with total products and the modified products array
         res.status(200).json({
@@ -618,3 +620,63 @@ exports.updateAnyProduct = async (req, res) => {
    
 
 }
+
+// DELETE /products/:id
+
+exports.deletProduct = async (req,res)=>{
+    try {
+        const productId = req.body._id;
+
+        // Find the product by ID
+        const product = await Product.findById(productId);
+        if (!product) {
+            return res.status(404).json({ status: 'failed', message: 'Product not found' });
+        }
+
+        // Remove each image file from the storage
+        product.images.forEach(image => {
+            // Construct the path to the image file
+            const imageFileName = image.split('/').pop(); // Extract the file name from the URL
+            const imageFilePath = path.join(__dirname, '..', 'uploads', 'products', imageFileName);
+
+            // Delete the image file from the storage
+            fs.unlink(imageFilePath, (err) => {
+                if (err) {
+                    console.error('Error deleting image file:', err);
+                }
+            });
+        });
+
+        // Delete the product from the database
+        await Product.findByIdAndDelete(productId);
+
+        res.status(200).json({ status: 'success', message: 'Product and associated images deleted successfully' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ status: 'failed', error: 'Server error' });
+    }
+}
+// router.delete('/product/delete', async (req, res) => {
+//     try {
+//         const productId = req.body._id; // Get the product ID from the request parameters
+
+//         // Check if the ID is valid (optional)
+//         if (!mongoose.Types.ObjectId.isValid(productId)) {
+//             return res.status(400).send('Invalid product ID');
+//         }
+
+//         // Find and delete the product
+//         const result = await Product.findByIdAndDelete(productId);
+
+//         // If no product was found, send a 404 response
+//         if (!result) {
+//             return res.status(404).send('Product not found');
+//         }
+
+//         // Send a success response
+//         res.status(200).send('Product deleted successfully');
+//     } catch (error) {
+//         // Handle any errors that occurred during the process
+//         res.status(500).send('Server error');
+//     }
+// });
