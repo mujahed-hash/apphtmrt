@@ -258,7 +258,7 @@ exports.signUp = async (req, res) => {
             country,
             isAdmin: isAdmin || false,
             isSupplier: isSupplier || false,
-            isBuyer: isBuyer || false,
+            isBuyer: isBuyer || true,
             customIdentifer: customIdentifier,
         });
 

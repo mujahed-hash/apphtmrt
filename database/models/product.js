@@ -38,4 +38,5 @@ productSchema.virtual('id').get(function(){
 productSchema.set('toJSON',{
     virtuals: true,
 });
+productSchema.index({ prodName: 'text', prodDesc: 'text' });
 module.exports = mongoose.model('Product', productSchema);

@@ -9,6 +9,7 @@ const catRoute = require('./router/category');
 const prodRoute = require('./router/product');
 const orderRoute = require('./router/order');
 const cartRoute = require('./router/cart');
+const reqRoute = require('./router/requirements');
 
 var path = require('path');
 
@@ -20,13 +21,17 @@ app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
 
 app.use('/uploads/products', express.static(__dirname + '/uploads/products'))
+app.use('/uploads/categories', express.static(__dirname + '/uploads/categories'))
+app.use('/uploads/requirements', express.static(__dirname + '/uploads/requirements/'))
 
 
 app.use('/api', userRoute);
 app.use('/api', catRoute)
 app.use('/api', prodRoute)
 app.use('/api', cartRoute)
-app.use('/api', orderRoute)
+app.use('/api', orderRoute),
+app.use('/api/request', reqRoute)
+
 
 app.use(express.static(path.join(__dirname, 'public')));
 

@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const categorySchema = mongoose.Schema({
     itemType:String,
     itemName:String,
+    image:[{type:String}],
     customIdentifer:String,
 });
 
