@@ -93,7 +93,7 @@ router.get('/requirement/:customIdentifier', middleware.verifyToken, async (req,
 router.post('/post-product-info', middleware.verifyToken, roleMiddleware('isSupplier'), postProductInfo);
 
 // Get requirements forwarded to supplier
-router.get('/requirements', middleware.verifyToken, roleMiddleware('isSupplier'), getForwardedRequirementsForSupplier);
+router.get('/requirements/for-sup', middleware.verifyToken, roleMiddleware('isSupplier'), getForwardedRequirementsForSupplier);
 router.get('/supplier-completed-requirements', middleware.verifyToken, roleMiddleware('isSupplier'), getCompletedRequirementsForSupplier);
 router.get('/supplier-completed-products', middleware.verifyToken, roleMiddleware('isSupplier'), getDeliveredProductsForSupplier);
 // router.get('/supplier-delivered-products', middleware.verifyToken, roleMiddleware('isSupplier'), getCompletedProductsForSupplier);

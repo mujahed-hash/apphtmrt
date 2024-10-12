@@ -88,7 +88,7 @@ const getForwardedRequirementsForSupplier = async (req, res) => {
         const supplierId = req.userId;
 
         // Find all requirements where the supplier is in the forwardedTo list
-        const requirements = await Requirement.find({ forwardedTo: supplierId, status: { $in: ['Pending', 'Fowarded'] }  // Finds products with status either 'Delivered' or 'Completed'
+        const requirements = await Requirement.find({ forwardedTo: supplierId, status: { $in: ['Pending', 'Forwarded'] }  // Finds products with status either 'Delivered' or 'Completed'
     });
 
         // Map through the requirements to add a 'hasPosted' flag
