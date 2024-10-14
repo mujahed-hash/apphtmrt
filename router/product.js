@@ -9,7 +9,7 @@ const Product = require('../database/models/product');
 const Cart = require('../database/models/cart');
 
 // Create a new post
-router.post('/product', middleware.verifyToken, roleMiddleware('isSupplier'), upload.array('image'), productController.productPost);
+router.post('/product', middleware.verifyToken, roleMiddleware('isSupplier'), upload.array('images'), productController.productPost);
 // by user
 router.delete('/product/delete', middleware.verifyToken, productController.deletProduct);
 router.get('/products',middleware.verifyToken,productController.getProducts );
