@@ -63,4 +63,6 @@ userSchema.methods.getJwt = function() {
     }, process.env.secret,
 );
 }
+userSchema.index({ name: 'text', email: 1, customIdentifer: 1, isAdmin: 1 });
+
 module.exports = mongoose.model('User', userSchema);

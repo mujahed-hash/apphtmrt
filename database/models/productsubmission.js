@@ -13,5 +13,6 @@ const productSubmissionSchema = new mongoose.Schema({
     },
     date: { type: Date, default: Date.now }
 });
+productSubmissionSchema.index({ requirement: 1, supplier: 1, status: 1 });
 
 module.exports = mongoose.model('ProductSubmission', productSubmissionSchema);

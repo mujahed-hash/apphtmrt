@@ -10,7 +10,8 @@ const prodRoute = require('./router/product');
 const orderRoute = require('./router/order');
 const cartRoute = require('./router/cart');
 const reqRoute = require('./router/requirements');
-
+const SearchProd = require('./router/search');
+const adminSearch = require('./router/adminsearch')
 var path = require('path');
 
 
@@ -31,6 +32,8 @@ app.use('/api', prodRoute)
 app.use('/api', cartRoute)
 app.use('/api', orderRoute),
 app.use('/api/request', reqRoute)
+app.use('/api', SearchProd);
+app.use('/api', adminSearch);
 
 
 app.use(express.static(path.join(__dirname, 'public')));

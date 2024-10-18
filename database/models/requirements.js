@@ -25,5 +25,6 @@ const requirementSchema = mongoose.Schema({
     },
     date: { type: Date, default: Date.now }
 });
+requirementSchema.index({ buyer: 1, status: 1, customIdentifier: 1 });
 
 module.exports = mongoose.model('Requirement', requirementSchema);

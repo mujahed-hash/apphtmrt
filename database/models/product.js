@@ -39,4 +39,6 @@ productSchema.set('toJSON',{
     virtuals: true,
 });
 productSchema.index({ prodName: 'text', prodDesc: 'text' });
+productSchema.index({ category: 1 });
+productSchema.index({ prodPrice: 1 });
 module.exports = mongoose.model('Product', productSchema);
