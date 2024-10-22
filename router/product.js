@@ -68,4 +68,67 @@ router.get('/products/by-category/:customIdentifier',middleware.verifyToken, asy
         res.status(500).json({ message: 'Server error' });
     }
 });
+
+
+router.get('/supplier/products/search', middleware.verifyToken,roleMiddleware('isSupplier'), async (req, res) => {
+    try {
+      const {  query = '', category, minPrice, maxPrice, start = 0, limit = 10 } = req.query;
+  
+      const supplierId = req.userId;
+      // Validate that supplierId is provided
+      if (!supplierId) {
+        return res.status(400).json({ message: 'Supplier ID is required.' });
+      }
+  
+      // Build search conditions dynamically
+      const searchConditions = {
+        user: supplierId, // Fetch products by this supplier
+        $and: [],
+      };
+  
+      // Add product name or description filtering (text search)
+      if (query) {
+        searchConditions.$and.push({
+          $or: [
+            { prodName: { $regex: query, $options: 'i' } },
+            { prodDesc: { $regex: query, $options: 'i' } },
+          ],
+        });
+      }
+  
+      // Add category filtering if provided
+      if (category) {
+        searchConditions.$and.push({ category });
+      }
+  
+      // Add price range filtering if provided
+      if (minPrice || maxPrice) {
+        searchConditions.$and.push({
+          prodPrice: {
+            ...(minPrice && { $gte: parseFloat(minPrice) }),
+            ...(maxPrice && { $lte: parseFloat(maxPrice) }),
+          },
+        });
+      }
+  
+      // Remove empty $and array to avoid invalid queries
+      if (!searchConditions.$and.length) delete searchConditions.$and;
+  
+      // Fetch matching products with pagination
+      const products = await Product.find(searchConditions)
+        .skip(parseInt(start))
+        .limit(parseInt(limit))
+        .populate('category', 'name') // Populate category with name
+        .lean();
+  
+      const totalResults = await Product.countDocuments(searchConditions); // Get total count for pagination
+  
+      // Respond with paginated results
+      res.status(200).json({ products, totalResults });
+    } catch (error) {
+      console.error('Error fetching supplier products:', error);
+      res.status(500).json({ message: 'Server error.' });
+    }
+  });
+
 module.exports = router;
