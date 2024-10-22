@@ -41,5 +41,6 @@ const orderSchema = new mongoose.Schema({
     default: Date.now
 }
 }, { timestamps: true });
+orderSchema.index({ user: 1, customIdentifer: 1, status: 1 });
 
 module.exports = mongoose.model('Order', orderSchema);
