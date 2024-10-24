@@ -444,22 +444,35 @@ const getDeliveredProductsForSupplier = async (req, res) => {
 };
 const getDeliveredProductsForAdmin = async (req, res) => {
     try {
-        const supplierId = req.userId; // Assuming the supplier is authenticated and their ID is available
-
-        const completedProducts = await ProductSubmission.find({ 
-            status: { $in: ['Delivered', 'Completed'] }  // Finds products with status either 'Delivered' or 'Completed'
-        }).populate('requirement', 'buyer reqDetails customIdentifier')
-          .populate('requirement.buyer', 'name phone email street city zip country');  // Populating buyer details
-
-        if (!completedProducts.length) {
-            return res.status(404).json({ message: 'No completed products found.' });
-        }
-
-        res.status(200).json(completedProducts);
+      const supplierId = req.userId; // Supplier's ID from authentication
+  
+      const completedProducts = await ProductSubmission.find({
+        status: { $in: ['Delivered', 'Completed'] }
+      })
+        .populate({
+          path: 'requirement',
+          select: 'buyer reqDetails customIdentifier',
+          populate: {
+            path: 'buyer',
+            select: 'name phone email street city zip country'
+          }
+        })
+        .populate({
+          path: 'supplier',
+          select: 'name email phone street city zip country'
+        });
+  
+      if (!completedProducts.length) {
+        return res.status(404).json({ message: 'No completed products found.' });
+      }
+  
+      res.status(200).json(completedProducts);
     } catch (error) {
-        res.status(500).json({ message: 'Error retrieving completed products.', error });
+      console.error('Error retrieving completed products:', error);
+      res.status(500).json({ message: 'Error retrieving completed products.', error });
     }
-};
+  };
+  
 // Example route to get requested submissions
 
 const updateStatusToDelivered = async (req, res) => {
