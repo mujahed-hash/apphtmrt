@@ -44,6 +44,10 @@ const userSchema = mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Product'
     }],
+    requests: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Request'
+    }],
     
     date: { type: Date, default: Date.now },
 

@@ -187,7 +187,58 @@ router.get('/admin/search', middleware.verifyToken, async (req, res) => {
   
   
   
-  
+   // Admin delete document by ID route
+router.delete('/admin/doc/delete', middleware.verifyToken, roleMiddleware('isAdmin'), async (req, res) => {
+  try {
+    const { model, id } = req.body;
+
+    // Validate that both model and id are provided
+    if (!model || !id) {
+      return res.status(400).json({ message: 'Model and ID are required.' });
+    }
+
+    // Check if the ID is a valid MongoDB ObjectId
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: 'Invalid ID format.' });
+    }
+
+    // Define a variable to store the model reference
+    let Model;
+    switch (model) {
+      case 'Product':
+        Model = Product;
+        break;
+      case 'User':
+        Model = User;
+        break;
+      case 'Order':
+        Model = Order;
+        break;
+      case 'Category':
+        Model = Category;
+        break;
+      case 'ProductSubmission':
+        Model = ProductSubmission;
+        break;
+      case 'Requirement':
+        Model = Requirement;
+        break;
+      default:
+        return res.status(400).json({ message: 'Invalid model specified.' });
+    }
+
+    // Perform the delete operation
+    const result = await Model.findByIdAndDelete(id);
+    if (!result) {
+      return res.status(404).json({ message: 'Document not found.' });
+    }
+
+    res.status(200).json({ message: 'Document deleted successfully.', deletedDocument: result });
+  } catch (error) {
+    console.error('Error deleting document:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
   
 
 module.exports = router;
