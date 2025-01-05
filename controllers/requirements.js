@@ -73,7 +73,7 @@ const forwardRequirementToSuppliers = async (req, res) => {
         suppliers.forEach(async (supplier) => {
             await Notification.create({
                 userId: supplier._id,
-                message: `A new requirement has been forwarded to you by admin for buyer ${requirement.buyer}.`,
+                message: `A new requirement has been forwarded to you by admin for buyer.`,
                 referenceId: requirement._id
             });
         });
@@ -367,7 +367,7 @@ const RequestDelivery = async (req, res) => {
         // Notify the admin about the delivery request
         await Notification.create({
             userId: requirement.admin, // Assuming the admin is notified
-            message: `Buyer ${req.userId} has requested delivery for product ${productSubmission.name}.`
+            message: `Buyer has requested delivery for product ${productSubmission.name}.`
         });
 
         res.status(200).json({ message: 'Delivery request submitted successfully.' });
@@ -496,7 +496,11 @@ const updateStatusToDelivered = async (req, res) => {
         if (!productSubmission) {
             return res.status(404).json({ message: 'Product submission not found.' });
         }
-
+  // Notify the buyer about the confirmed delivery
+  await Notification.create({
+    userId: requirement.buyer._id,
+    message: `Your delivery for product ${productSubmission.name} has been delivered.`,
+});
         // Update the statuses to 'Delivered'
         requirement.status = 'Delivered';
         await requirement.save();

@@ -13,6 +13,7 @@ const reqRoute = require('./router/requirements');
 const SearchProd = require('./router/search');
 const adminSearch = require('./router/adminsearch');
 const Makerequest = require('./router/request');
+const Notification = require('./router/notification');
 
 var path = require('path');
 
@@ -37,6 +38,8 @@ app.use('/api/request', reqRoute)
 app.use('/api', SearchProd);
 app.use('/api', adminSearch);
 app.use('/api', Makerequest);
+app.use('/api', Notification);
+
 
 
 app.use(express.static(path.join(__dirname, 'public')));
