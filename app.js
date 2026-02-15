@@ -149,6 +149,7 @@ app.use('/api/locations', locationRouter);
 
 app.use('/api', require('./router/serviceOrder')); // Add the service order route
 app.use('/api/admin', require('./router/adminServiceOrder')); // Add the admin service order route
+app.use('/api/admin', require('./router/monitoring')); // Server Monitoring Routes
 
 // Serve the frontend static files
 app.use(express.static(path.join(__dirname, 'public')));
@@ -163,12 +164,12 @@ async function ensureSuperAdmin() {
   try {
     // Check if a super admin already exists
     const existingSuperAdmin = await User.findOne({ isSuperAdmin: true });
-    
+
     if (existingSuperAdmin) {
       console.log('Super admin already exists:', existingSuperAdmin.email);
       return;
     }
-    
+
     // Super admin details
     const name = 'Super Admin';
     const email = 'superadmin@super.com';
@@ -177,10 +178,10 @@ async function ensureSuperAdmin() {
     const firstname = 'Super'; // Add firstname
     const lastname = 'Admin'; // Add lastname
     const image = 'assets/images/default-avatar.png'; // Add default image
-    
+
     // Check if email already exists
     const existingUser = await User.findOne({ email });
-    
+
     if (existingUser) {
       // Update existing user to super admin
       existingUser.isSuperAdmin = true;
@@ -188,7 +189,7 @@ async function ensureSuperAdmin() {
       existingUser.firstname = firstname; // Update firstname
       existingUser.lastname = lastname;   // Update lastname
       existingUser.image = image;         // Update image
-      
+
       await existingUser.save();
       console.log('Existing user updated to super admin:', existingUser.email);
     } else {
@@ -196,7 +197,7 @@ async function ensureSuperAdmin() {
       const passwordHash = await argon2.hash(password);
       const randomComponent = Date.now().toString();
       const customIdentifier = `${slugify(name, { lower: true })}-${randomComponent}`;
-      
+
       const superAdmin = new User({
         name,
         email,
@@ -209,7 +210,7 @@ async function ensureSuperAdmin() {
         lastname: lastname,   // Set lastname for new super admin
         image: image          // Set image for new super admin
       });
-      
+
       await superAdmin.save();
       console.log('Super admin created automatically:', superAdmin.email);
       console.log('Super admin credentials: Email:', email, '- Password:', password);
@@ -226,7 +227,7 @@ server.listen(port, async function () {
   console.log("*** HOTELMART BACKEND SERVER STARTED! ***");
   console.log(`*** Running on http://localhost:${port} ***`);
   console.log("*****************************************");
-  
+
   // Ensure super admin exists when server starts
   await ensureSuperAdmin();
 
