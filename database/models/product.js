@@ -19,7 +19,7 @@ const productSchema = mongoose.Schema({
         required: true
     },
     customIdentifer: String,
-    images: [{type: String}],
+    images: [{ type: String }],
     prodPrice: {
         type: Number,
         required: true
@@ -32,7 +32,7 @@ const productSchema = mongoose.Schema({
     prodSize: {
         type: String,
         required: true
-    }, 
+    },
     isFeatured: {
         type: Boolean,
         default: false
@@ -41,7 +41,7 @@ const productSchema = mongoose.Schema({
         type: Date,
         default: Date.now
     },
-    
+
     // NEW FIELDS - Multi-location support
     locations: [{
         state: { type: String, required: true },
@@ -49,83 +49,84 @@ const productSchema = mongoose.Schema({
         stateCode: { type: String }, // For easier filtering (e.g., "MH", "DL")
         cityCode: { type: String }   // For easier filtering (e.g., "mumbai", "delhi")
     }],
-    
+
     // NEW FIELDS - Enhanced product details
-    brand: { 
+    brand: {
         type: String,
-        default: '' 
+        default: ''
     },
     condition: {
         type: String,
         enum: ['new', 'like-new', 'good', 'fair', 'refurbished'],
         default: 'new'
     },
-    minOrderQuantity: { 
-        type: Number, 
-        default: 1 
+    minOrderQuantity: {
+        type: Number,
+        default: 1
     },
-    maxOrderQuantity: { 
-        type: Number 
+    maxOrderQuantity: {
+        type: Number
     },
-    
+
     // NEW FIELDS - Business details
     businessType: {
         type: String,
         enum: ['manufacturer', 'wholesaler', 'distributor', 'retailer', 'supplier'],
         default: 'supplier'
     },
-    
+
     // NEW FIELDS - Delivery & logistics
-    deliveryAvailable: { 
-        type: Boolean, 
-        default: true 
+    deliveryAvailable: {
+        type: Boolean,
+        default: true
     },
-    estimatedDeliveryDays: { 
+    estimatedDeliveryDays: {
         type: Number,
         default: 7
     },
-    freeDeliveryAbove: { 
-        type: Number 
+    freeDeliveryAbove: {
+        type: Number
     }, // Free delivery above this amount
-    
+
     // NEW FIELDS - Ratings & reviews (for future use)
-    averageRating: { 
-        type: Number, 
-        default: 0, 
-        min: 0, 
-        max: 5 
+    averageRating: {
+        type: Number,
+        default: 0,
+        min: 0,
+        max: 5
     },
-    totalReviews: { 
-        type: Number, 
-        default: 0 
+    totalReviews: {
+        type: Number,
+        default: 0
     },
-    
+
     // NEW FIELDS - Metadata
     tags: [{ type: String }], // For better search (e.g., "eco-friendly", "premium", "bulk")
-    isActive: { 
-        type: Boolean, 
-        default: true 
+    isActive: {
+        type: Boolean,
+        default: true
     }, // Can be used to soft-delete
-    views: { 
-        type: Number, 
-        default: 0 
+    views: {
+        type: Number,
+        default: 0
     }, // Track product views
-    lastUpdated: { 
-        type: Date, 
-        default: Date.now 
+    lastUpdated: {
+        type: Date,
+        default: Date.now
     }
 });
 
-productSchema.virtual('id').get(function(){
+productSchema.virtual('id').get(function () {
     return this._id.toHexString();
 });
 
-productSchema.set('toJSON',{
+productSchema.set('toJSON', {
     virtuals: true,
 });
 
 // Enhanced indexes for better query performance
-// Note: Text index already exists as 'product_text_search_index', so we skip creating a new one
+// Text index for search
+productSchema.index({ prodName: 'text', prodDesc: 'text', tags: 'text' });
 productSchema.index({ category: 1, 'locations.cityCode': 1 });
 productSchema.index({ prodPrice: 1 });
 productSchema.index({ 'locations.stateCode': 1 });
@@ -138,8 +139,8 @@ productSchema.index({ averageRating: -1 });
 productSchema.index({ businessType: 1 });
 
 // Virtual field to expose customIdentifer as customIdentifier for frontend compatibility
-productSchema.virtual('customIdentifier').get(function() {
-  return this.customIdentifer;
+productSchema.virtual('customIdentifier').get(function () {
+    return this.customIdentifer;
 });
 
 // Ensure virtual fields are serialized
